@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,6 +15,8 @@ import (
 
 func main() {
 	api := slack.New(os.Getenv("SLACK_BOT_TOKEN"))
+
+	fmt.Println("aaa")
 
 	http.HandleFunc("/slack/events", func(w http.ResponseWriter, r *http.Request) {
 		body, err := ioutil.ReadAll(r.Body)
