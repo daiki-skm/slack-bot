@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,13 +16,25 @@ import (
 func main() {
 	api := slack.New(os.Getenv("SLACK_BOT_TOKEN"))
 
-	fmt.Println("aaa")
-
 	http.HandleFunc("/slack/events", func(w http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
+		verifier, err := slack.NewSecretsVerifier(r.Header, os.Getenv("SLACK_SIGNING_SECRET"))
 		if err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		bodyReader := io.TeeReader(r.Body, &verifier)
+		body, err := ioutil.ReadAll(bodyReader)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		if err := verifier.Ensure(); err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
@@ -58,12 +70,22 @@ func main() {
 				}
 
 				command := message[1]
+				options := message[2:]
+
 				switch command {
 				case "ping":
-					if _, _, err := api.PostMessage(event.Channel, slack.MsgOptionText("pong", false)); err != nil {
-						log.Println(err)
-						w.WriteHeader(http.StatusInternalServerError)
-						return
+					if len(options) > 0 {
+						if _, _, err := api.PostMessage(event.Channel, slack.MsgOptionText("oi!", false)); err != nil {
+							log.Println(err)
+							w.WriteHeader(http.StatusInternalServerError)
+							return
+						}
+					} else {
+						if _, _, err := api.PostMessage(event.Channel, slack.MsgOptionText("pong", false)); err != nil {
+							log.Println(err)
+							w.WriteHeader(http.StatusInternalServerError)
+							return
+						}
 					}
 				}
 			}
