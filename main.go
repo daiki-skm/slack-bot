@@ -75,10 +75,63 @@ func main() {
 				switch command {
 				case "ping":
 					if len(options) > 0 {
-						if _, _, err := api.PostMessage(event.Channel, slack.MsgOptionText("oi!", false)); err != nil {
-							log.Println(err)
-							w.WriteHeader(http.StatusInternalServerError)
-							return
+						switch {
+						case len(options) > 1:
+							if _, _, err := api.PostMessage(event.Channel, slack.MsgOptionBlocks(
+								&slack.SectionBlock{
+									Type: slack.MBTSection,
+									Text: &slack.TextBlockObject{
+										Type: "mrkdwn",
+										Text: "*いやちょっと多いぃ！*",
+									},
+								},
+							)); err != nil {
+								log.Println(err)
+								w.WriteHeader(http.StatusInternalServerError)
+								return
+							}
+						case options[0] == "pong":
+							if _, _, err := api.PostMessage(event.Channel, slack.MsgOptionBlocks(
+								&slack.SectionBlock{
+									Type: slack.MBTSection,
+									Text: &slack.TextBlockObject{
+										Type: "mrkdwn",
+										Text: "*いやそれ俺が言うやつぅ！*",
+									},
+								},
+							)); err != nil {
+								log.Println(err)
+								w.WriteHeader(http.StatusInternalServerError)
+								return
+							}
+						case options[0] == "ping":
+							if _, _, err := api.PostMessage(event.Channel, slack.MsgOptionBlocks(
+								&slack.SectionBlock{
+									Type: slack.MBTSection,
+									Text: &slack.TextBlockObject{
+										Type: "mrkdwn",
+										Text: "*いや同じこと2回ぃぃ‍️！*",
+									},
+								},
+							)); err != nil {
+								log.Println(err)
+								w.WriteHeader(http.StatusInternalServerError)
+								return
+							}
+						default:
+							if _, _, err := api.PostMessage(event.Channel, slack.MsgOptionBlocks(
+								&slack.SectionBlock{
+									Type: slack.MBTSection,
+									Text: &slack.TextBlockObject{
+										Type: "mrkdwn",
+										Text: "*いや想定外ぃぃ！*",
+									},
+								},
+							)); err != nil {
+								log.Println(err)
+								w.WriteHeader(http.StatusInternalServerError)
+								return
+							}
 						}
 					} else {
 						if _, _, err := api.PostMessage(event.Channel, slack.MsgOptionText("pong", false)); err != nil {
@@ -86,6 +139,20 @@ func main() {
 							w.WriteHeader(http.StatusInternalServerError)
 							return
 						}
+					}
+				default:
+					if _, _, err := api.PostMessage(event.Channel, slack.MsgOptionBlocks(
+						&slack.SectionBlock{
+							Type: slack.MBTSection,
+							Text: &slack.TextBlockObject{
+								Type: "mrkdwn",
+								Text: "<https://www.youtube.com/watch?v=bs1rRIVBzh0&list=PLN5VowuWXMKaXddkh5NkCRGdoW3mXsCuq&index=10|my favorite songs>:ghost:",
+							},
+						},
+					)); err != nil {
+						log.Println(err)
+						w.WriteHeader(http.StatusInternalServerError)
+						return
 					}
 				}
 			}
