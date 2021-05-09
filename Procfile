@@ -1,1 +1,1 @@
-web: slack-bot
+worker: slack-bot
